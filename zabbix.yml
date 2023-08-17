@@ -1,0 +1,35 @@
+---
+
+- hosts: all
+  become: yes
+  tasks:
+  - name: install zabbix-agent redhat
+    yum:
+       name=zabbix-agent
+       state=latest
+    when:
+        ansible_os_family == "RedHat"
+    notify:
+        Start zabbix-agent
+
+  - name: Install zabbix-agent on Ubuntu
+    apt:
+        name=zabbix-agent
+        state=latest
+    when:
+        ansible_os_family == "Debian"
+    notify:
+        Start zabbix-agent 
+
+
+  - name: copy zabbix_agentd
+    template:
+          src: /etc/ansible/common/files/zabbix_agentd.conf
+          dest: /etc/zabbix/zabbix_agentd.conf
+
+  handlers:
+  - name: Start zabbix-agent
+    systemd:
+     name: zabbix-agent
+     state: started
+     enabled: yes
